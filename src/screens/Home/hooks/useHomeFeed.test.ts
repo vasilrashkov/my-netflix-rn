@@ -1,12 +1,14 @@
 import { renderHook } from '@testing-library/react-native';
 
 import { HOME_COLLECTIONS } from '@/config/collections';
+import { useAppWideErrorCode } from '@/hooks/useAppWideErrorCode';
 import { useMovieSearch } from '@/hooks/useMovies';
 import type { MovieSummary } from '@/types/movie';
 
 import { getHomeFeedItemType, useHomeFeed } from './useHomeFeed';
 
 jest.mock('@/hooks/useMovies', () => ({ useMovieSearch: jest.fn() }));
+jest.mock('@/hooks/useAppWideErrorCode', () => ({ useAppWideErrorCode: jest.fn(() => null) }));
 
 const searchResult = jest.mocked(useMovieSearch);
 
@@ -40,6 +42,16 @@ describe('useHomeFeed', () => {
     const keys = (await renderFeed([movie])).map(({ key }) => key);
 
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe('useHomeFeed with an app-wide error', () => {
+  it('leaves out the empty vertical list, but keeps movies already loaded', async () => {
+    jest.mocked(useAppWideErrorCode).mockReturnValueOnce('rate-limited');
+    expect((await renderFeed([])).map(({ type }) => type)).not.toContain('section-header');
+
+    jest.mocked(useAppWideErrorCode).mockReturnValueOnce('rate-limited');
+    expect((await renderFeed([movie])).map(({ type }) => type)).toContain('movie');
   });
 });
 

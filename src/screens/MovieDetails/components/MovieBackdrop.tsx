@@ -6,6 +6,7 @@ import { colors } from '@/theme/theme';
 import type { MovieSummary } from '@/types/movie';
 import { posterUrlForWidth } from '@/utils/poster';
 
+const BACKDROP_POSTER_WIDTH = 1000;
 const PARALLAX_FACTOR = 0.4;
 const MAX_OVERSCROLL_SCALE = 2;
 
@@ -37,7 +38,7 @@ export const MovieBackdrop = ({ movie, height, scrollY }: MovieBackdropProps) =>
   return (
     <Animated.View style={{ height, transform: [{ translateY }, { scale }] }}>
       <Poster
-        uri={movie.posterUrl && posterUrlForWidth(movie.posterUrl, 1000)}
+        uri={movie.posterUrl && posterUrlForWidth(movie.posterUrl, BACKDROP_POSTER_WIDTH)}
         previewUri={movie.posterUrl}
         title={movie.title}
         priority="high"

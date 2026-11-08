@@ -25,13 +25,10 @@ export const useMovieSearch = (query: string) => {
 
   const movies = data ? selectMovies(data) : NO_MOVIES;
 
-  // Called by lists as they near the end. After a failed page it does nothing: lists fire it again
-  // when their footer changes size, which would otherwise retry in a loop and burn the daily quota.
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage && !isFetchNextPageError) fetchNextPage();
   };
 
-  /** For a Retry button after a failed page: the user asked, so fetch again. */
   const retryLoadMore = () => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   };

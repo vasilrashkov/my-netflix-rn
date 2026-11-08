@@ -11,6 +11,7 @@ import { navigationTheme } from '@/theme/navigationTheme';
 import { colors } from '@/theme/theme';
 import { linking } from '@/utils/linking';
 
+import { AppWideErrorBanner } from './AppWideErrorBanner';
 import { StateView } from './StateView';
 
 const CrashFallback = ({ resetErrorBoundary }: FallbackProps) => {
@@ -34,6 +35,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
             <NavigationContainer theme={navigationTheme} linking={linking}>
               {children}
             </NavigationContainer>
+            <AppWideErrorBanner />
           </PersistGate>
         </Provider>
       </ErrorBoundary>

@@ -10,6 +10,7 @@ import {
   SkeletonGroup,
 } from '@/components';
 import { useMovieSearch } from '@/hooks/useMovies';
+import { isAppWideError } from '@/services/ApiError';
 import { colors, spacing, typography } from '@/theme/theme';
 import type { Collection } from '@/types/collection';
 import type { MovieSummary } from '@/types/movie';
@@ -52,7 +53,11 @@ export const CollectionRail = ({ collection, onOpenMovie, onSeeAll }: Collection
     <MovieCard movie={item} onPress={onOpenMovie} style={styles.card} />
   );
 
-  if (!isLoading && !error && movies.length === 0) return null;
+  // App-wide errors (quota, API key) are shown once by AppWideErrorBanner, so a rail with nothing
+  // to show hides instead of leaving an empty row.
+  const hasOwnError = Boolean(error) && !isAppWideError(error);
+
+  if (!isLoading && !hasOwnError && movies.length === 0) return null;
 
   return (
     <View style={styles.rail}>
@@ -76,7 +81,7 @@ export const CollectionRail = ({ collection, onOpenMovie, onSeeAll }: Collection
             }}
             ItemSeparatorComponent={Separator}
             ListFooterComponent={
-              isFetchNextPageError ? (
+              isFetchNextPageError && hasOwnError ? (
                 <View style={styles.errorFooter}>
                   <QueryErrorView compact error={error} onRetry={retryLoadMore} />
                 </View>
@@ -88,7 +93,7 @@ export const CollectionRail = ({ collection, onOpenMovie, onSeeAll }: Collection
             }
           />
         </View>
-      ) : error ? (
+      ) : hasOwnError ? (
         <View style={sideInsets}>
           <QueryErrorView compact error={error} onRetry={refetch} />
         </View>

@@ -58,6 +58,16 @@ describe('moviesApi retries', () => {
     expect(getMovie).toHaveBeenCalledTimes(1);
   });
 
+  it('never retries an unexpected error from our own code', async () => {
+    getMovie.mockRejectedValue(new TypeError('Cannot read properties of undefined'));
+
+    const request = fetchMovie();
+    await jest.advanceTimersByTimeAsync(ALL_RETRIES_MS);
+
+    expect((await request).error).toEqual({ code: 'unknown', message: 'Unexpected error' });
+    expect(getMovie).toHaveBeenCalledTimes(1);
+  });
+
   it('stops retrying once the request is cancelled', async () => {
     getMovie.mockRejectedValue(new ApiError('timeout', 'slow'));
 

@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 
@@ -186,6 +186,20 @@ describe('HomeScreen', () => {
 
     expect(await screen.findByLabelText('Life of Pi, 2000')).toBeTruthy();
     expect(screen.queryByText('Retry')).toBeNull();
+  });
+
+  it('leaves app-wide errors to the banner instead of repeating them on every list', async () => {
+    getMovie.mockRejectedValue(new ApiError('rate-limited', 'Request limit reached!'));
+    searchMovies.mockRejectedValue(new ApiError('rate-limited', 'Request limit reached!'));
+
+    await renderScreen();
+
+    await waitFor(() => expect(searchMovies).toHaveBeenCalled());
+    await act(async () => {});
+
+    expect(screen.queryByText('Daily limit reached')).toBeNull();
+    expect(screen.queryByText('Retry')).toBeNull();
+    expect(screen.queryByText('Worth Discovering')).toBeNull();
   });
 
   it('keeps the screen working when one rail fails, and retries only that rail', async () => {

@@ -1,4 +1,5 @@
 import { DISCOVER_COLLECTION, HOME_COLLECTIONS } from '@/config/collections';
+import { useAppWideErrorCode } from '@/hooks/useAppWideErrorCode';
 import { useMovieSearch } from '@/hooks/useMovies';
 import type { Collection } from '@/types/collection';
 import type { MovieSummary } from '@/types/movie';
@@ -14,6 +15,8 @@ export type HomeFeedItem =
 export const useHomeFeed = () => {
   const { movies, error, isFetchingNextPage, isFetchNextPageError, loadMore, retryLoadMore } =
     useMovieSearch(DISCOVER_COLLECTION.query);
+  const appWideErrorCode = useAppWideErrorCode();
+  const showDiscover = movies.length > 0 || !appWideErrorCode;
 
   const feed: HomeFeedItem[] = [
     { type: 'hero', key: 'hero' },
@@ -22,14 +25,24 @@ export const useHomeFeed = () => {
       key: `rail:${collection.id}`,
       collection,
     })),
-    { type: 'section-header', key: 'discover-header', collection: DISCOVER_COLLECTION },
+    ...(showDiscover
+      ? [
+          {
+            type: 'section-header' as const,
+            key: 'discover-header',
+            collection: DISCOVER_COLLECTION,
+          },
+        ]
+      : []),
     ...(movies.length > 0
       ? movies.map((movie) => ({
           type: 'movie' as const,
           key: `movie:${movie.id}`,
           movie,
         }))
-      : [{ type: 'discover-status' as const, key: 'discover-status' }]),
+      : showDiscover
+        ? [{ type: 'discover-status' as const, key: 'discover-status' }]
+        : []),
   ];
 
   return { feed, error, isFetchingNextPage, isFetchNextPageError, loadMore, retryLoadMore };

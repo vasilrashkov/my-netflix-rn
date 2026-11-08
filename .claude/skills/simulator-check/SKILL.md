@@ -33,11 +33,12 @@ judging the layout.
 
 ## Temporary logging
 
-1. Copy the file to the scratchpad.
+1. Copy each file you'll change to the scratchpad. Never back up and restore the whole `src/`:
+   the user edits in parallel, and restoring a folder would undo their changes.
 2. Add `console.log('[probe] ...')`. To see when values change without disturbing React
    Compiler, use `useEffect(() => console.log(...), [value])`.
 3. Restart Metro, run the scenario, then read the lines with `grep '\[probe\]' <metro log>`.
-4. Copy the saved file back, `diff` it to confirm, and `grep -rn probe src` to confirm nothing is
+4. Copy each saved file back, `diff` it to confirm, and `grep -rn probe src` to confirm nothing is
    left.
 
 ## Finish
