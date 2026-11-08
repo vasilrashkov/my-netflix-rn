@@ -12,7 +12,7 @@ const SCRIM_HEIGHT = 180;
 const SCRIM_COLORS = [colors.scrim, colors.scrimTop, colors.scrimClear] as const;
 
 export const HomeHeader = ({ solid }: { solid: boolean }) => {
-  const { top } = useSafeAreaInsets();
+  const { top, left, right } = useSafeAreaInsets();
   const opacity = useAnimatedValue(0);
 
   useEffect(() => {
@@ -24,7 +24,17 @@ export const HomeHeader = ({ solid }: { solid: boolean }) => {
   }, [opacity, solid]);
 
   return (
-    <View pointerEvents="none" style={[styles.header, { paddingTop: top + spacing.sm }]}>
+    <View
+      pointerEvents="none"
+      style={[
+        styles.header,
+        {
+          paddingTop: top + spacing.sm,
+          paddingLeft: spacing.md + left,
+          paddingRight: spacing.md + right,
+        },
+      ]}
+    >
       <LinearGradient colors={SCRIM_COLORS} locations={[0, 0.5, 1]} style={styles.scrim} />
       <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, { opacity }]} />
       <AppText variant="wordmark" accessibilityRole="header">
@@ -40,7 +50,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
   },
   scrim: {

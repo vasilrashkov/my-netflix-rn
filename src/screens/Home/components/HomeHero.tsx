@@ -17,7 +17,7 @@ const GRADIENT_COLORS = [colors.scrimClear, colors.scrim, colors.background] as 
 
 export const HomeHero = () => {
   const { width, height: windowHeight } = useWindowDimensions();
-  const { top } = useSafeAreaInsets();
+  const { top, left, right } = useSafeAreaInsets();
   const { data: movie, isLoading } = useMovie(getFeaturedMovieId());
   const openMovie = useOpenMovie();
 
@@ -46,7 +46,7 @@ export const HomeHero = () => {
         style={styles.poster}
       />
       <LinearGradient colors={GRADIENT_COLORS} locations={[0.4, 0.85, 1]} style={styles.scrim} />
-      <View style={styles.copy}>
+      <View style={[styles.copy, { left: spacing.md + left, right: spacing.md + right }]}>
         <AppText variant="display" numberOfLines={2}>
           {movie.title}
         </AppText>
@@ -77,8 +77,6 @@ const styles = StyleSheet.create({
   },
   copy: {
     position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
     bottom: spacing.md,
     gap: spacing.sm,
   },

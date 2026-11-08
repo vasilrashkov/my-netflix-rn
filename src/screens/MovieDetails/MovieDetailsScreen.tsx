@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { QueryErrorView } from '@/components';
 import { useMovie } from '@/hooks/useMovies';
@@ -14,6 +15,7 @@ import { OverviewSkeleton } from './components/OverviewSkeleton';
 export const MovieDetailsScreen = ({ route }: RootScreenProps<'MovieDetails'>) => {
   const { movieId, preview } = route.params;
   const { data: details, error, refetch } = useMovie(movieId);
+  const { left, right } = useSafeAreaInsets();
 
   const summary = details ?? preview;
   const isNotFound = getApiErrorCode(error) === 'not-found';
@@ -24,7 +26,12 @@ export const MovieDetailsScreen = ({ route }: RootScreenProps<'MovieDetails'>) =
 
   if (!summary) {
     return (
-      <View style={styles.loading}>
+      <View
+        style={[
+          styles.loading,
+          { paddingLeft: spacing.md + left, paddingRight: spacing.md + right },
+        ]}
+      >
         <OverviewSkeleton />
       </View>
     );

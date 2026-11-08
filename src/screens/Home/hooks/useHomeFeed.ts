@@ -12,7 +12,8 @@ export type HomeFeedItem =
 
 // This could easily become an API call from a wrapper around the omdb API, but for now it's just a static feed.
 export const useHomeFeed = () => {
-  const { movies, isFetchingNextPage, loadMore } = useMovieSearch(DISCOVER_COLLECTION.query);
+  const { movies, error, isFetchingNextPage, isFetchNextPageError, loadMore, retryLoadMore } =
+    useMovieSearch(DISCOVER_COLLECTION.query);
 
   const feed: HomeFeedItem[] = [
     { type: 'hero', key: 'hero' },
@@ -31,7 +32,7 @@ export const useHomeFeed = () => {
       : [{ type: 'discover-status' as const, key: 'discover-status' }]),
   ];
 
-  return { feed, isFetchingNextPage, loadMore };
+  return { feed, error, isFetchingNextPage, isFetchNextPageError, loadMore, retryLoadMore };
 };
 
 export const getHomeFeedItemType = (item: HomeFeedItem): string => {

@@ -101,6 +101,11 @@ describe('CollectionScreen', () => {
     await act(() => screen.getByTestId('collection-grid').props.onEndReached());
 
     expect(await screen.findByText('Retry')).toBeTruthy();
+
+    // Reaching the end again must not retry on its own: lists fire this whenever the footer changes.
+    const callsAfterFailure = searchMovies.mock.calls.length;
+    await act(() => screen.getByTestId('collection-grid').props.onEndReached());
+    expect(searchMovies.mock.calls.length).toBe(callsAfterFailure);
     expect(screen.getByLabelText('Movie a, 2000')).toBeTruthy();
 
     nextPageFails = false;

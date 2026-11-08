@@ -27,6 +27,7 @@ const getMovie = jest.mocked(omdbClient.getMovie);
 const searchMovies = jest.mocked(omdbClient.searchMovies);
 
 const FAILING_RAIL_QUERY = 'batman';
+const DISCOVER_QUERY = 'life';
 
 const pageOf = (movie: MovieSummary): MoviePage => ({
   movies: [movie],
@@ -128,6 +129,63 @@ describe('HomeScreen', () => {
     await act(() => screen.getByTestId('home-feed').props.refreshControl.props.onRefresh());
 
     expect(searchMovies.mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+
+  it("keeps a rail's movies and offers a retry when its next page fails", async () => {
+    let nextPageFails = true;
+    searchMovies.mockImplementation(async (query, pageNumber) => {
+      if (query !== FAILING_RAIL_QUERY || pageNumber === 1) {
+        return { ...pageOf(movieFor(query)), hasMore: query === FAILING_RAIL_QUERY };
+      }
+      if (nextPageFails) throw new ApiError('timeout', 'slow');
+      return pageOf({ ...movieFor(query), id: 'tt-batman-2', title: 'Batman Returns' });
+    });
+
+    await renderScreen();
+    await screen.findByLabelText('Movie about batman, 2000');
+
+    await act(() => screen.getByTestId('rail-caped-crusaders').props.onEndReached());
+
+    expect(await screen.findByText('Retry')).toBeTruthy();
+
+    // Reaching the end again must not retry on its own: lists fire this whenever the footer changes.
+    const callsAfterFailure = searchMovies.mock.calls.length;
+    await act(() => screen.getByTestId('rail-caped-crusaders').props.onEndReached());
+    expect(searchMovies.mock.calls.length).toBe(callsAfterFailure);
+    expect(screen.getByLabelText('Movie about batman, 2000')).toBeTruthy();
+
+    nextPageFails = false;
+    await fireEvent.press(screen.getByText('Retry'));
+
+    expect(await screen.findByLabelText('Batman Returns, 2000')).toBeTruthy();
+    expect(screen.queryByText('Retry')).toBeNull();
+  });
+
+  it('offers a retry when the next page of the vertical list fails, without retrying on its own', async () => {
+    let nextPageFails = true;
+    searchMovies.mockImplementation(async (query, pageNumber) => {
+      if (query !== DISCOVER_QUERY || pageNumber === 1) {
+        return { ...pageOf(movieFor(query)), hasMore: query === DISCOVER_QUERY };
+      }
+      if (nextPageFails) throw new ApiError('timeout', 'slow');
+      return pageOf({ ...movieFor(query), id: 'tt-life-2', title: 'Life of Pi' });
+    });
+
+    await renderScreen();
+    await screen.findByLabelText('Movie about life, 2000');
+
+    await act(() => screen.getByTestId('home-feed').props.onEndReached());
+    expect(await screen.findByText('Retry')).toBeTruthy();
+
+    const callsAfterFailure = searchMovies.mock.calls.length;
+    await act(() => screen.getByTestId('home-feed').props.onEndReached());
+    expect(searchMovies.mock.calls.length).toBe(callsAfterFailure);
+
+    nextPageFails = false;
+    await fireEvent.press(screen.getByText('Retry'));
+
+    expect(await screen.findByLabelText('Life of Pi, 2000')).toBeTruthy();
+    expect(screen.queryByText('Retry')).toBeNull();
   });
 
   it('keeps the screen working when one rail fails, and retries only that rail', async () => {

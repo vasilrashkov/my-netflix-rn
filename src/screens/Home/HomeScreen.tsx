@@ -9,7 +9,9 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { QueryErrorView } from '@/components';
 import { useRefreshMovies } from '@/hooks/useMovies';
 import { useOpenMovie } from '@/hooks/useOpenMovie';
 import { colors, spacing } from '@/theme/theme';
@@ -28,8 +30,11 @@ const HEADER_SOLID_OFFSET = 240;
 export const HomeScreen = () => {
   const navigation = useNavigation();
   const refreshMovies = useRefreshMovies();
+  const { left, right } = useSafeAreaInsets();
+  const sideInsets = { paddingLeft: left, paddingRight: right };
   const openMovie = useOpenMovie();
-  const { feed, isFetchingNextPage, loadMore } = useHomeFeed();
+  const { feed, error, isFetchingNextPage, isFetchNextPageError, loadMore, retryLoadMore } =
+    useHomeFeed();
 
   const [headerSolid, setHeaderSolid] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,14 +57,22 @@ export const HomeScreen = () => {
         );
       case 'section-header':
         return (
-          <View style={styles.sectionHeader}>
+          <View style={[styles.sectionHeader, sideInsets]}>
             <SectionHeader collection={item.collection} onSeeAll={openCollection} />
           </View>
         );
       case 'discover-status':
-        return <DiscoverStatus />;
+        return (
+          <View style={sideInsets}>
+            <DiscoverStatus />
+          </View>
+        );
       case 'movie':
-        return <MovieListItem movie={item.movie} onPress={openMovie} />;
+        return (
+          <View style={sideInsets}>
+            <MovieListItem movie={item.movie} onPress={openMovie} />
+          </View>
+        );
     }
   };
 
@@ -96,7 +109,13 @@ export const HomeScreen = () => {
           />
         }
         ListFooterComponent={
-          isFetchingNextPage ? <ActivityIndicator color={colors.textMuted} /> : null
+          isFetchNextPageError ? (
+            <View style={sideInsets}>
+              <QueryErrorView compact error={error} onRetry={retryLoadMore} />
+            </View>
+          ) : isFetchingNextPage ? (
+            <ActivityIndicator color={colors.textMuted} />
+          ) : null
         }
       />
       <HomeHeader solid={headerSolid} />

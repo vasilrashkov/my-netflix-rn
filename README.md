@@ -1,4 +1,4 @@
-# Marquee
+# My Netflix
 
 A streaming-style movie home screen built with React Native, Expo and TypeScript, using live data
 from the [OMDb API](https://www.omdbapi.com/).
@@ -10,7 +10,7 @@ from the [OMDb API](https://www.omdbapi.com/).
 - **See all:** a paginated grid for any collection, added as a third screen to prove out the
   structure
 - **Offline launches:** the RTK Query cache is persisted, so previously loaded content still appears
-- **Deep links:** `marquee://movie/tt0468569` and `marquee://collection/star-wars`
+- **Deep links:** `mynetflix://movie/tt0468569` and `mynetflix://collection/star-wars`
 
 ## Getting started
 
@@ -45,19 +45,21 @@ src/
 │   ├── MovieDetails/
 │   └── Collection/
 ├── services/           API calls: OMDb client, errors, RTK Query API and store
-├── utils/              Helper functions, models and static configuration
+├── utils/              Helper functions
 ├── hooks/              Hooks shared between screens
-└── theme/              Design tokens and the navigation theme
+├── theme/              Design tokens and the navigation theme
+├── types/              Domain models and navigation types
+└── config/             Environment values and the curated home collections
 ```
 
 Tests sit next to the file they cover. A component or hook lives with its screen until a second
 screen needs it, then moves to `components/` or `hooks/`. Only the `omdb*` files in `services/` know
-what an OMDb response looks like. The rest of the app uses the models in `utils/movie.ts`, so
+what an OMDb response looks like. The rest of the app uses the models in `types/movie.ts`, so
 replacing OMDb with an in-house API means rewriting those files, and nothing in the screens.
 
 **Adding a screen:** create a folder for it in `screens/`, add its params to
-`utils/navigationTypes.ts`, and register it in `components/RootNavigator.tsx`. A home rail is one
-line in `utils/collections.ts`.
+`types/navigation.ts`, and register it in `components/RootNavigator.tsx`. A home rail is one
+line in `config/collections.ts`.
 
 ## Key decisions
 
@@ -73,6 +75,9 @@ problems, and Redux gives client state an obvious home as the app grows. RTK Que
 to disk by itself, so `redux-persist` saves the cache, `PersistGate` stops screens fetching before
 it has loaded, and `restoreCache` drops failed or expired entries. Retries use RTK Query's `retry`,
 with a condition that only repeats transient failures.
+
+**React Compiler instead of manual memoization.** It memoizes at build time, so the code has no
+`useMemo`, `useCallback` or `memo`. It only covers this app's code, not `node_modules`.
 
 **One flat FlashList for the home feed.** Hero, rails and list rows are a single list of typed
 items, built by the `useHomeFeed` hook. Nesting vertical lists in a `ScrollView` would

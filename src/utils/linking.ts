@@ -6,6 +6,7 @@ import type { RootStackParamList } from '@/types/navigation';
 export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [createURL('/')],
   config: {
+    initialRouteName: 'Home',
     screens: {
       Home: '',
       MovieDetails: 'movie/:movieId',

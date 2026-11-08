@@ -20,7 +20,7 @@ export const MovieDetailsContent = ({
   children,
 }: PropsWithChildren<MovieDetailsContentProps>) => {
   const { width, height: windowHeight } = useWindowDimensions();
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, left, right } = useSafeAreaInsets();
   const scrollY = useAnimatedValue(0);
 
   const backdropHeight = Math.min(
@@ -40,7 +40,11 @@ export const MovieDetailsContent = ({
       })}
     >
       <MovieBackdrop movie={movie} height={backdropHeight} scrollY={scrollY} />
-      <View style={styles.body}>{children}</View>
+      <View
+        style={[styles.body, { paddingLeft: spacing.md + left, paddingRight: spacing.md + right }]}
+      >
+        {children}
+      </View>
     </Animated.ScrollView>
   );
 };
@@ -53,6 +57,5 @@ const styles = StyleSheet.create({
   body: {
     gap: spacing.lg,
     marginTop: -spacing.xxl,
-    paddingHorizontal: spacing.md,
   },
 });

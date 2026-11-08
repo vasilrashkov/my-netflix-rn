@@ -30,13 +30,24 @@ export const getColumnCount = (screenWidth: number) => {
 
 const CollectionGrid = ({ collection }: { collection: Collection }) => {
   const { width } = useWindowDimensions();
-  const { bottom } = useSafeAreaInsets();
+  const { bottom, left, right } = useSafeAreaInsets();
   const openMovie = useOpenMovie();
-  const { movies, error, isLoading, isFetchingNextPage, isFetchNextPageError, loadMore, refetch } =
-    useMovieSearch(collection.query);
+  const {
+    movies,
+    error,
+    isLoading,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    loadMore,
+    retryLoadMore,
+    refetch,
+  } = useMovieSearch(collection.query);
 
-  const numColumns = getColumnCount(width);
-  const columnWidth = (width - CELL_PADDING * 2) / numColumns;
+  // In landscape the notch takes one side, so columns fit the width inside the insets.
+  const usableWidth = width - left - right;
+  const numColumns = getColumnCount(usableWidth);
+  const columnWidth = (usableWidth - CELL_PADDING * 2) / numColumns;
+  const sidePadding = { paddingLeft: CELL_PADDING + left, paddingRight: CELL_PADDING + right };
 
   const renderItem: ListRenderItem<MovieSummary> = ({ item }) => (
     <MovieCard movie={item} onPress={openMovie} titleLines={TITLE_LINES} style={styles.card} />
@@ -44,7 +55,7 @@ const CollectionGrid = ({ collection }: { collection: Collection }) => {
 
   if (isLoading) {
     return (
-      <SkeletonGroup style={styles.skeletonGrid}>
+      <SkeletonGroup style={[styles.skeletonGrid, sidePadding]}>
         {SKELETON_CARDS.map((card) => (
           <View key={card} style={[styles.card, styles.skeletonCard, { width: columnWidth }]}>
             <Skeleton style={styles.skeletonPoster} />
@@ -77,10 +88,10 @@ const CollectionGrid = ({ collection }: { collection: Collection }) => {
       renderItem={renderItem}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
-      contentContainerStyle={[styles.grid, { paddingBottom: bottom + spacing.md }]}
+      contentContainerStyle={[sidePadding, { paddingBottom: bottom + spacing.md }]}
       ListFooterComponent={
         isFetchNextPageError ? (
-          <QueryErrorView compact error={error} onRetry={loadMore} />
+          <QueryErrorView compact error={error} onRetry={retryLoadMore} />
         ) : isFetchingNextPage ? (
           <ActivityIndicator color={colors.textMuted} />
         ) : null
@@ -100,9 +111,6 @@ export const CollectionScreen = ({ route }: RootScreenProps<'Collection'>) => {
 };
 
 const styles = StyleSheet.create({
-  grid: {
-    paddingHorizontal: CELL_PADDING,
-  },
   card: {
     padding: CELL_PADDING,
     paddingBottom: spacing.sm,
@@ -110,7 +118,6 @@ const styles = StyleSheet.create({
   skeletonGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: CELL_PADDING,
   },
   skeletonCard: {
     gap: spacing.sm,
