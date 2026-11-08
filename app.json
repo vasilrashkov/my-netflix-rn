@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "My Netflix",
+    "slug": "exworks-task",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.exworks.mynetflix"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.exworks.mynetflix"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-image", "expo-asset", "expo-font"],
+    "scheme": "mynetflix",
+    "backgroundColor": "#0B0B0F",
+    "experiments": {
+      "reactCompiler": true
+    }
+  }
+}
